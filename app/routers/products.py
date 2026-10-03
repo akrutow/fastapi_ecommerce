@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import select, update
+from fastapi import APIRouter, Depends, HTTPException, status, Query
+from sqlalchemy import select, update, func, desc
 
 from app.models.categories import Category as CategoryModel
 from app.models.products import Product as ProductModel
-from app.schemas import Product as ProductSchema, ProductCreate 
+from app.schemas import Product as ProductSchema, ProductCreate, ProductList
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.db_depends import get_async_db
@@ -18,11 +18,24 @@ router = APIRouter(
 )
 
 
-@router.get('/', response_model=list[ProductSchema], status_code=status.HTTP_200_OK)
-async def get_all_products(db: AsyncSession = Depends(get_async_db)):
-    """Возвращает список всех товаров."""
-    result = await db.scalars(select(ProductModel).where(ProductModel.is_active == True))
-    return result.all()
+@router.get('/', response_model=ProductList, status_code=status.HTTP_200_OK)
+async def get_all_products(
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: AsyncSession = Depends(get_async_db)
+    ):
+    '''Возвращает список всех активных товаров.'''
+    total_stmt = select(func.count()).select_from(ProductModel).where(ProductModel.is_active == True)
+    total = await db.scalar(total_stmt) or 0
+    products_stmt = (
+        select(ProductModel)
+        .where(ProductModel.is_active == True)
+        .order_by(ProductModel.id)
+        .offset((page - 1) * page_size)
+        .limit(page_size)
+    )
+    items = (await db.scalars(products_stmt)).all()
+    return {'items': items, 'total': total, 'page': page, 'page_size': page_size}
 
 
 @router.post('/', response_model=ProductSchema, status_code=status.HTTP_201_CREATED)
@@ -31,7 +44,7 @@ async def create_product(
     db: AsyncSession = Depends(get_async_db),
     current_user: UserModel = Depends(get_current_seller)
     ):
-    """Создаёт новый товар, привязанный к текущему продавцу (только для 'seller')."""
+    '''Создаёт новый товар, привязанный к текущему продавцу (только для 'seller').'''
     category_result = await db.scalars(select(CategoryModel).where(
         CategoryModel.id == product.category_id,
         CategoryModel.is_active == True)
