@@ -16,14 +16,12 @@ from app.schemas import UserCreate, User as UserSchema, RefreshTokenRequest
 router = APIRouter(prefix='/users', tags=['users'])
 
 
-######
 @router.get('/', response_model=list[UserSchema], status_code=status.HTTP_200_OK)
 async def get_all_users(db: AsyncSession = Depends(get_async_db)):
     '''Возвращает список всех пользователей'''
     stmt = await db.scalars(select(UserModel))
     users = stmt.all()
     return users
-######
 
 
 @router.post('/', response_model=UserSchema, status_code=status.HTTP_201_CREATED)

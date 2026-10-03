@@ -21,6 +21,7 @@ router = APIRouter(
 
 
 async def update_product_rating(db: AsyncSession, product_id: int):
+    '''Функция для расчёта среднего grade'''
     result = await db.execute(
         select(func.avg(ReviewModel.grade)).where(
             ReviewModel.product_id == product_id,
@@ -47,6 +48,7 @@ async def get_review_by_product(
     prod_id: int,
     db: AsyncSession = Depends(get_async_db)
     ):
+    '''Получение отзывов о конкретном товаре'''
     result = await db.scalars(select(ProductModel).where(ProductModel.id == prod_id,
                                                          ProductModel.is_active == True))
     product = result.first()
@@ -81,7 +83,9 @@ async def create_review(
 async def delete_review(
     review_id: int, 
     db: AsyncSession = Depends(get_async_db),
-    current_user: UserModel = Depends(get_current_user)):
+    current_user: UserModel = Depends(get_current_user)
+    ):
+    '''Мягкое удаление отзыва'''
     result = await db.scalars(select(ReviewModel).where(ReviewModel.id == review_id,
                                                         ReviewModel.is_active == True))
     review = result.first()

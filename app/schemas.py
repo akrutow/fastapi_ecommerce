@@ -4,16 +4,16 @@ from datetime import datetime
 
 
 class CategoryCreate(BaseModel):
-    """Модель для создания и обновления категории.
-    Используется в POST и PUT запросах."""
+    '''Модель для создания и обновления категории.
+    Используется в POST и PUT запросах.'''
     name: str = Field(..., min_length=3, max_length=50, 
                       description='Название категории (3-50 символов)')
     parent_id: int | None = Field(None, description='ID родительской категории, если есть')
 
 
 class Category(BaseModel):
-    """Модель для ответа с данными категории.
-    Используется в GET-запросах."""
+    '''Модель для ответа с данными категории.
+    Используется в GET-запросах.'''
     id: int = Field(..., description='Уникальный идентификатор категории')
     name: str = Field(..., description='Название категории')
     parent_id: int | None = Field(None, description='ID родительской категории, если есть')
@@ -23,8 +23,8 @@ class Category(BaseModel):
 
 
 class ProductCreate(BaseModel):
-    """Модель для создания и обновления товара.
-    Используется в POST и PUT запросах."""
+    '''Модель для создания и обновления товара.
+    Используется в POST и PUT запросах.'''
     name: str = Field(..., min_length=3, max_length=100, 
                       description='Название товара (3-100 символов)')
     description: str | None = Field(None, max_length=500, 
@@ -36,49 +36,54 @@ class ProductCreate(BaseModel):
 
 
 class Product(BaseModel):
-    """Модель для ответа с данными товара.
-    Используется в GET-запросах."""
+    '''Модель для ответа с данными товара.
+    Используется в GET-запросах.'''
     id: int = Field(..., description='Уникальный идентификатор товара')
     name: str = Field(..., description='Название товара')
     description: str | None = Field(None, description='Описание товара')
     price: Decimal = Field(..., description='Цена товара в рублях', gt=0, decimal_places=2)
     image_url: str | None = Field(None, description='URL изображения товара')
-    stock: int = Field(..., description="Количество товара на складе")
-    category_id: int = Field(..., description="ID категории")
-    is_active: bool = Field(..., description="Активность товара")
+    stock: int = Field(..., description='Количество товара на складе')
+    category_id: int = Field(..., description='ID категории')
+    is_active: bool = Field(..., description='Активность товара')
     rating: float = Field(default=0.0)
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class UserCreate(BaseModel):
+    '''Модель для создания пользователя.
+    Роли: admin, bueyr, seller'''
     email: EmailStr = Field(description='Email пользователя')
     password: str = Field(min_length=8, description='Пароль (минимум 8 символов)')
     role: str = Field(default='buyer', pattern='^(admin|buyer|seller)$', description="Роль: 'admin', 'buyer' или 'seller'")
 
 
 class User(BaseModel):
-    id: int = Field(...,)
-    email: EmailStr = Field(...,)
-    is_active: bool = Field(default=True)
-    role: str = Field(...,)
+    '''Модель для ответа с данными пользователя'''
+    id: int = Field(..., description='Уникальный идентификатор пользователя')
+    email: EmailStr = Field(..., description='Email пользователя')
+    is_active: bool = Field(default=True, description='Активность пользователя')
+    role: str = Field(..., description='Роль пользователя')
     model_config = ConfigDict(from_attributes=True)
 
 
 class ReviewCreate(BaseModel):
-    product_id: int = Field(...,)
-    comment: str | None = Field(None)
-    grade: int = Field(..., ge=1, le=5)
+    '''Модель для создания отзыва'''
+    product_id: int = Field(..., description='Идентификатор продукта')
+    comment: str | None = Field(None, description='Текст отзыва')
+    grade: int = Field(..., ge=1, le=5, description='Оценка')
 
 
 class Review(BaseModel):
-    id: int = Field(...,)
-    user_id: int = Field(...,)
-    product_id: int = Field(...,)
-    comment: str | None = Field(None)
-    comment_date: datetime = Field(default=datetime.now)
-    grade: int = Field(...,)
-    is_active: bool = Field(default=True)
+    '''Модель для ответа с данными отзыва'''
+    id: int = Field(..., description='Уникальный идентификатор отзыва')
+    user_id: int = Field(..., description='Идентификатор пользователя')
+    product_id: int = Field(..., description='Идентификатор продукта')
+    comment: str | None = Field(None, description='Текст отзыва')
+    comment_date: datetime = Field(default=datetime.now, description='Дата отзыва')
+    grade: int = Field(..., description='Оценка')
+    is_active: bool = Field(default=True, description='Для мягкого удаления')
     model_config = ConfigDict(from_attributes=True)
 
 
