@@ -11,6 +11,8 @@ from app.db_depends import get_async_db
 from app.models.users import User as UserModel
 from app.auth import get_current_seller
 
+from datetime import datetime
+
 
 router = APIRouter(
     prefix='/products',
@@ -28,6 +30,7 @@ async def get_all_products(
     in_stock: bool | None = Query(
         None, description='true — только товары в наличии, false — только без остатка'),
     seller_id: int | None = Query(None, description='ID продавца для фильтрации'),
+    created_at: datetime | None = Query(None, description='Дата создания'),
     db: AsyncSession = Depends(get_async_db)
     ):
     '''Возвращает список всех активных товаров с поддержкой фильтров.'''
@@ -49,6 +52,8 @@ async def get_all_products(
         filters.append(ProductModel.stock > 0 if in_stock else ProductModel.stock == 0)
     if seller_id is not None:
         filters.append(ProductModel.seller_id == seller_id)
+    if created_at is not None:
+        filters.append(ProductModel.created_at == created_at)
     # Подсчёт общего количества с учётом фильтров
     total_stmt = select(func.count()).select_from(ProductModel).where(*filters)
     total = await db.scalar(total_stmt) or 0
