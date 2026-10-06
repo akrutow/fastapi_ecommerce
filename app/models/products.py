@@ -39,7 +39,7 @@ class Product(Base):
     category: Mapped['Category'] = relationship('Category', back_populates='products')
     seller: Mapped['User'] = relationship('User', back_populates='products')
     reviews: Mapped[list['Review']] = relationship('Review', back_populates='products')
-    cart_items: Mapped[list['CartItems']] = relationship('CartItems', 
+    cart_items: Mapped[list['CartItem']] = relationship('CartItem', 
                                                          back_populates='product',
                                                          cascade='all, delete-orphan')
 

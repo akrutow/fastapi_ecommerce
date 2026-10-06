@@ -16,6 +16,6 @@ class User(Base):
     products: Mapped[list['Product']] = relationship('Product', back_populates='seller')
     category: Mapped[list['Category']] = relationship('Category', back_populates='admin')
     reviews: Mapped[list['Review']] = relationship('Review', back_populates='user')
-    cart_items: Mapped[list['CartItems']] = relationship('CartItems', 
-                                                             back_populates='product',
+    cart_items: Mapped[list['CartItem']] = relationship('CartItem', 
+                                                             back_populates='user',
                                                              cascade='all, delete-orphan')
