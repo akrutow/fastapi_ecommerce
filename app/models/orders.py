@@ -17,7 +17,7 @@ class Order(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )
-    update_at: Mapped[datetime] = mapped_column(
+    updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
     )
     user: Mapped['User'] = relationship('User', back_populates='orders')
@@ -30,8 +30,8 @@ class OrderItem(Base):
     __tablename__ = 'order_items'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey('orders.id', ondelete='CASCADE'), nullable=False, index=True
     )
     product_id: Mapped[int] = mapped_column(
         ForeignKey('products.id'), nullable=False, index=True
